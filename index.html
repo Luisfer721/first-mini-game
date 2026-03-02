@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OMG LOOK AT THIS</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #121212;
+            color: white;
+            font-family: -apple-system, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #main-btn {
+            padding: 20px 50px;
+            font-size: 22px;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            position: absolute;
+            transition: all 0.15s ease-out;
+            z-index: 10;
+        }
+
+        #loader-container {
+            display: none;
+            text-align: center;
+        }
+
+        #loader {
+            border: 6px solid #333;
+            border-top: 6px solid #28a745;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #scare-img {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 100;
+        }
+
+        /* FILTROS CSS MEJORADOS */
+        .crazy-effect {
+            display: block !important;
+            animation: flashBg 0.05s infinite, psych 0.1s infinite;
+        }
+
+        @keyframes flashBg {
+            0% {
+                background-color: red;
+            }
+
+            50% {
+                background-color: blue;
+            }
+
+            100% {
+                background-color: yellow;
+            }
+        }
+
+        @keyframes psych {
+            0% {
+                filter: hue-rotate(0deg) invert(100%);
+                transform: scale(1);
+            }
+
+            50% {
+                filter: hue-rotate(180deg) invert(0%);
+                transform: scale(1.1);
+            }
+
+            100% {
+                filter: hue-rotate(360deg) invert(100%);
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="main-btn">PRESS ME</button>
+
+    <div id="loader-container">
+        <div id="loader"></div>
+        <p>Loading Mini Game...</p>
+    </div>
+
+    <img id="scare-img"
+        src="https://static.wikia.nocookie.net/ficcion-sin-limites/images/3/37/La_tumino_bisexual%2C_es_mi_headcannon_pero_me_importa_una_tula.jpg/revision/latest?cb=20191126125425&path-prefix=es">
+
+    <audio id="scare-snd" src="https://www.myinstants.com/media/sounds/screamer.mp3" preload="auto" playsinline></audio>
+
+    <script>
+        const btn = document.getElementById('main-btn');
+        const loaderCont = document.getElementById('loader-container');
+        const img = document.getElementById('scare-img');
+        const snd = document.getElementById('scare-snd');
+
+        let attempts = 0;
+        const maxAttempts = 8;
+
+        function moveButton() {
+            const maxX = window.innerWidth - btn.offsetWidth;
+            const maxY = window.innerHeight - btn.offsetHeight;
+            btn.style.left = Math.random() * maxX + "px";
+            btn.style.top = Math.random() * maxY + "px";
+            btn.style.transform = `scale(${1 - (attempts * 0.08)})`;
+        }
+
+        // TRUCO PARA IPHONE: Tocar el botón activa el audio permanentemente
+        btn.addEventListener('touchstart', (e) => {
+            if (attempts < maxAttempts) {
+                e.preventDefault();
+                attempts++;
+                moveButton();
+                // "Cebamos" el audio con un toque silencioso
+                snd.play().then(() => { snd.pause(); snd.currentTime = 0; }).catch(() => { });
+            }
+        });
+
+        btn.addEventListener('click', () => {
+            if (attempts >= maxAttempts) {
+                btn.style.display = 'none';
+                // Volvemos a asegurar el audio
+                snd.play().then(() => { snd.pause(); }).catch(() => { });
+                startSequence();
+            }
+        });
+
+        function startSequence() {
+            loaderCont.style.display = 'block';
+
+            setTimeout(() => {
+                loaderCont.style.display = 'none';
+                document.body.style.backgroundColor = 'black';
+
+                setTimeout(() => {
+                    // DISPARO DEL SUSTO
+                    document.body.classList.add('crazy-effect');
+                    img.classList.add('crazy-effect');
+
+                    snd.volume = 1.0;
+                    snd.play();
+
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
+                }, 5000);
+            }, 9000);
+        }
+    </script>
+</body>
+
+</html>
